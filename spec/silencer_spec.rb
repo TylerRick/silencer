@@ -17,10 +17,12 @@ describe Silencer::Logger do
     Silencer::Logger.new(@app).call(Rack::MockRequest.env_for("/"))
   end
 
+  let(:log_tags) { [:uuid, :queue] }
   it 'instantiates with an optional taggers array' do
     Rails.logger.should_not_receive(:level=).with(::Logger::ERROR).once
-
-    Silencer::Logger.new(@app, :uuid, :queue, :silence => ['/']).call(Rack::MockRequest.env_for("/"))
+    logger = Silencer::Logger.new(@app, log_tags, :silence => ['/'])
+    logger.instance_variable_get(:@taggers).should == log_tags
+    logger.call(Rack::MockRequest.env_for("/"))
   end
 
   it 'quiets the log when configured with a silenced path' do
